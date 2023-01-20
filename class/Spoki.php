@@ -40,7 +40,7 @@ class Spoki
      *          Portebbe restituire true in caso di successo o 
      *          false in caso di fallimento
      */
-    public function sendSingleMessage(object $contatto, string $message, string $url = "https://app.spoki.it/wh/ap/") /*: string|bool*/
+    public function sendSingleMessage(object $contatto, string $message, string $url = "https://app.spoki.it/wh/ap/") 
     {
 
         $ch = curl_init();
