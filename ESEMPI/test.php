@@ -1,5 +1,5 @@
 <?php
-include_once 'class/autoload.php';
+include_once '../class/autoload.php';
 
 //error_reporting(E_ALL);
 
@@ -8,7 +8,7 @@ include_once 'class/autoload.php';
 // $spoki = new Spoki("cd81527c-97dd-11ed-a8fc-0242ac120002");
 // $spoki->sendSingleMessage($contatto, "Messaggio di prova API", "https://app.spoki.it/api/messages/");
 
-// $contact = new SpokiContatto("3348768832");
-// Spoki::sendTemplateToClient($contact, SPOKI_TEMPLATE_PRESENTAZIONE, [
-//     'SENTENCE' => $contact->getFirstName(),
-// ]);
+$contact = new SpokiContatto("3348768832");
+Spoki::sendTemplateToClient($contact, SPOKI_TEMPLATE_PRESENTAZIONE, [
+    'SENTENCE' => $contact->getFirstName(),
+]);

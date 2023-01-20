@@ -143,7 +143,7 @@ class Spoki
 
         $resp = curl_exec($curl);
         curl_close($curl);
-        var_dump($resp);
+        // var_dump($resp);
     }
 
     /**

@@ -94,7 +94,7 @@ class SpokiContatto{
         $headers[] = 'Sec-Fetch-Mode: cors';
         $headers[] = 'Sec-Fetch-Site: cross-site';
         $headers[] = 'User-Agent: '.$_SERVER['HTTP_USER_AGENT'];
-        $headers[] = 'X-Spoki-Account: 5734';//Account utente spoki di chi invia messaggi
+        $headers[] = 'X-Spoki-Account: '.$this->account_code;
         $headers[] = 'X-Spoki-Platform-Version: 3.7.1';
         $headers[] = 'Sec-Ch-Ua: \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"108\", \"Google Chrome\";v=\"108\"';
         $headers[] = 'Sec-Ch-Ua-Mobile: ?0';
@@ -118,20 +118,20 @@ class SpokiContatto{
                 $this->account_code = $result->account;
                 $this->contact_id   = $result->id;
             }else{//Numero di telefono non trovato, va creato
-                echo "Numero di telefono non trovato";
-                $this->createContact();
+                return false;
+                //$this->createContact();
             }
 
-            echo "<pre>";
-            var_dump($this->first_name);
-            var_dump($this->last_name);
-            var_dump($this->email);
-            var_dump($this->phone);
-            var_dump($this->uid);
-            var_dump($this->account_code);
-            var_dump($this->contact_id);
-            print_r($result);
-            echo "</pre>";
+            // echo "<pre>";
+            // var_dump($this->first_name);
+            // var_dump($this->last_name);
+            // var_dump($this->email);
+            // var_dump($this->phone);
+            // var_dump($this->uid);
+            // var_dump($this->account_code);
+            // var_dump($this->contact_id);
+            // print_r($result);
+            // echo "</pre>";
         }
         curl_close($ch);
     }
@@ -162,7 +162,7 @@ class SpokiContatto{
         $headers[] = 'Sec-Fetch-Mode: cors';
         $headers[] = 'Sec-Fetch-Site: cross-site';
         $headers[] = 'User-Agent: '.$_SERVER['HTTP_USER_AGENT'];
-        $headers[] = 'X-Spoki-Account: 5734';
+        $headers[] = 'X-Spoki-Account: '.$this->account_code;
         $headers[] = 'X-Spoki-Platform-Version: 3.7.1';
         $headers[] = 'Sec-Ch-Ua: \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"108\", \"Google Chrome\";v=\"108\"';
         $headers[] = 'Sec-Ch-Ua-Mobile: ?0';
@@ -180,9 +180,9 @@ class SpokiContatto{
             Spoki::sendTemplateToClient($contact, "");
         }
 
-        echo "<pre>";
-        print_r($result);
-        echo "</pre>";
+        // echo "<pre>";
+        // print_r($result);
+        // echo "</pre>";
 
         curl_close($ch);
     }

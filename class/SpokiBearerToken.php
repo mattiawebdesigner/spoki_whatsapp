@@ -5,6 +5,14 @@ class SpokiBearerToken
     {
     }
 
+    /**
+     * Restituisce il token Bearer ottenuto dalla login
+     * a SPOKI.
+     * 
+     * @param string $username Nome utente del sito
+     * @param string $password Password utente del sito
+     * @return string Bearer Token
+     */
     public static function getToken(string $username, string $password)
     {
         $ch = curl_init();
