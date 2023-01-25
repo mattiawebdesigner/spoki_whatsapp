@@ -40,7 +40,7 @@ class Spoki
      *          Portebbe restituire true in caso di successo o 
      *          false in caso di fallimento
      */
-    public function sendSingleMessage(object $contatto, string $message, string $url = "https://app.spoki.it/wh/ap/") 
+    public function sendSingleMessage(object $contatto, string $message, $media_set = [], string $url = "https://app.spoki.it/wh/ap/") 
     {
 
         $ch = curl_init();
@@ -65,18 +65,26 @@ class Spoki
         $headers[] = 'Sec-Fetch-Mode: cors';
         $headers[] = 'Sec-Fetch-Site: cross-site';
         $headers[] = 'User-Agent: '.$_SERVER['HTTP_USER_AGENT'];
-        $headers[] = 'X-Spoki-Account: '.$contatto->getAccountCode();
+        $headers[] = 'X-Spoki-Account: '.SPOKI_USER_ACCOUNT;
         $headers[] = 'X-Spoki-Platform-Version: 3.7.1';
         $headers[] = 'Sec-Ch-Ua: \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"108\", \"Google Chrome\";v=\"108\"';
         $headers[] = 'Sec-Ch-Ua-Mobile: ?0';
         $headers[] = 'Sec-Ch-Ua-Platform: \"'.$_SERVER['HTTP_SEC_CH_UA_PLATFORM'].'\"';
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        // echo "==>", SPOKI_USER_ACCOUNT;
 
         $result = curl_exec($ch);
         if (curl_errno($ch)) {
             echo 'Error:' . curl_error($ch);
         }
         curl_close($ch);
+
+        // echo "<pre>";
+        // print_r($result);
+        // print_r($contatto);
+        // echo "</pre>";
+
+        return $result;
     }
 
     /**
@@ -144,6 +152,79 @@ class Spoki
         $resp = curl_exec($curl);
         curl_close($curl);
         // var_dump($resp);
+    }
+
+    /**
+    * @param array $postFields Dati da inviare
+    * @param array $fileFields 
+    *               Oggetto per ogni file: name => array(type=>'mime/type',
+    *                                                       content=>'raw data|resource',
+    *                                                       filename=>'file.csv')
+    */
+    public function create_post($delimiter, $postFields, $fileFields = array()){
+        // form field separator
+        $eol = "\r\n";
+        $data = '';
+        // populate normal fields first (simpler)
+        foreach ($postFields as $name => $content) {
+            $data .= "--$delimiter" . $eol;
+            $data .= 'Content-Disposition: form-data; name="' . $name . '"';
+            $data .= $eol.$eol; // note: double endline
+            $data .= $content;
+            $data .= $eol;
+        }
+        // populate file fields
+        foreach ($fileFields as $name => $file) {
+            $data .= "--$delimiter" . $eol;
+            // fallback on var name for filename
+            if (!array_key_exists('title', $file))
+            {
+                $file['filename'] = $name;
+            }
+            // "filename" attribute is not essential; server-side scripts may use it
+            $data .= 'Content-Disposition: form-data; name="' . $name . '";' .
+                ' filename="' . $file['filename'] . '"' . $eol;
+            // this is, again, informative only; good practice to include though
+            $data .= 'Content-Type: ' . $file['type'] . $eol;
+            // this endline must be here to indicate end of headers
+            $data .= $eol;
+            // the file itself (note: there's no encoding of any kind)
+            if (is_resource($file['content'])){
+                // rewind pointer
+                rewind($file['content']);
+                // read all data from pointer
+                while(!feof($file['content'])) {
+                    $data .= fgets($file['content']);
+                }
+                $data .= $eol;
+            }else {
+                // check if we are loading a file from full path
+                if (strpos($file['content'], '@') === 0){
+                    
+                    $file_path = substr($file['content'], 1);
+                    
+                    $fh = fopen(realpath($file_path), 'rb');
+                    // echo "<pre>";
+                    // print_r("MMM");
+                    // print_r($fh);
+                    // echo "</pre>"; 
+                    // echo "<br />"; 
+                    if ($fh) {
+                        while (!feof($fh)) {
+                            $data .= fgets($fh);
+                        }
+                        $data .= $eol;
+                        fclose($fh);
+                    }
+                }else {
+                    // use data as provided
+                    $data .= $file['content'] . $eol;
+                }
+            }
+        }
+        // last delimiter
+        $data .= "--" . $delimiter . "--$eol";
+        return $data;
     }
 
     /**

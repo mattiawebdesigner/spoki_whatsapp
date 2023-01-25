@@ -11,7 +11,7 @@ class SpokiBearerToken
      * 
      * @param string $username Nome utente del sito
      * @param string $password Password utente del sito
-     * @return string Bearer Token
+     * @return array Bearer Token e Account code
      */
     public static function getToken(string $username, string $password)
     {
@@ -54,8 +54,60 @@ class SpokiBearerToken
         
         curl_close($ch);
 
+        
+
         $decode_result = json_decode($response);
 
-        return $decode_result->access_token;
+        return [
+            'access_token' => $decode_result->access_token,
+            'account' => self::getAccountCode($decode_result->access_token),
+        ];
+    }
+
+    /**
+     * Restituisce il codice dell'account appena loggato
+     * su SPOKI
+     * 
+     * @param string $token Token generato per l'accesso
+     * @return string Codice dell'account loggato
+     */
+    private static function getAccountCode(string $token){
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, 'https://app.spoki.it/api/users/');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        $headers = array();
+        $headers[] = 'Accept: application/json, text/plain, */*';
+        $headers[] = 'Accept-Language: it-IT,it;q=0.9';
+        $headers[] = 'Authorization: Bearer '.$token;
+        $headers[] = 'Cache-Control: no-cache';
+        $headers[] = 'Connection: keep-alive';
+        $headers[] = 'Origin: https://spoki.app';
+        $headers[] = 'Pragma: no-cache';
+        $headers[] = 'Referer: https://spoki.app/';
+        $headers[] = 'Sec-Fetch-Dest: empty';
+        $headers[] = 'Sec-Fetch-Mode: cors';
+        $headers[] = 'Sec-Fetch-Site: cross-site';
+        $headers[] = 'User-Agent: '.$_SERVER['HTTP_USER_AGENT'];
+        $headers[] = 'X-Spoki-Platform-Version: 3.7.3';
+        $headers[] = 'Sec-Ch-Ua: \"Not_A Brand\";v=\"99\", \"Google Chrome\";v=\"109\", \"Chromium\";v=\"109\"';
+        $headers[] = 'Sec-Ch-Ua-Mobile: ?0';
+        $headers[] = 'Sec-Ch-Ua-Platform: \"'.$_SERVER['HTTP_SEC_CH_UA_PLATFORM'].'\"';
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        
+        $result = json_decode($result);
+
+        curl_close($ch);
+
+        return $result[0]->role_set[0]->account;
     }
 }

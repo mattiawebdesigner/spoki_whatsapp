@@ -75,7 +75,12 @@ class SpokiContatto{
     private function readResponseBySpoki(){
         $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_URL, "https://app.spoki.it/api/contacts/?is_deleted=False&search={$this->phone}&page_size=100&page=1");
+        // echo "OK<br />";
+
+        $url = "https://app.spoki.it/api/contacts/?is_deleted=False&search={$this->phone}&page_size=100&page=1";
+        // $url = "https://app.spoki.it/api/contacts/?is_deleted=False&search=3348768832&page_size=100&page=1";
+        curl_setopt($ch, CURLOPT_URL, $url);
+        // curl_setopt($ch, CURLOPT_URL, "https://app.spoki.it/api/users/");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
 
@@ -94,7 +99,7 @@ class SpokiContatto{
         $headers[] = 'Sec-Fetch-Mode: cors';
         $headers[] = 'Sec-Fetch-Site: cross-site';
         $headers[] = 'User-Agent: '.$_SERVER['HTTP_USER_AGENT'];
-        $headers[] = 'X-Spoki-Account: '.$this->account_code;
+        $headers[] = 'X-Spoki-Account: '.SPOKI_USER_ACCOUNT;
         $headers[] = 'X-Spoki-Platform-Version: 3.7.1';
         $headers[] = 'Sec-Ch-Ua: \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"108\", \"Google Chrome\";v=\"108\"';
         $headers[] = 'Sec-Ch-Ua-Mobile: ?0';
@@ -104,11 +109,13 @@ class SpokiContatto{
         $result = curl_exec($ch);
         $result = json_decode($result);
         if (curl_errno($ch)) {
-            //echo 'Error:' . curl_error($ch);
+            echo 'Error:' . curl_error($ch);
         }else{
-            $result = $result->results[0];
+            $result = $result->results;
 
-            if(!empty($result)){//C'è un riscontro
+            if(sizeof($result)<>0){//C'è un riscontro
+                $result = $result[0];
+
                 //popolo i dati del contatto
                 $this->first_name   = $result->first_name;
                 $this->last_name    = $result->last_name;
@@ -122,18 +129,13 @@ class SpokiContatto{
                 //$this->createContact();
             }
 
-            // echo "<pre>";
-            // var_dump($this->first_name);
-            // var_dump($this->last_name);
-            // var_dump($this->email);
-            // var_dump($this->phone);
-            // var_dump($this->uid);
-            // var_dump($this->account_code);
-            // var_dump($this->contact_id);
-            // print_r($result);
-            // echo "</pre>";
         }
         curl_close($ch);
+
+
+        // echo "<pre>";
+        // print_r($result);
+        // echo "</pre>";
     }
 
     /**
